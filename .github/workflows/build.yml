@@ -6,15 +6,15 @@ on:
 jobs:
   build-project:
     runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Install Wine and winecc
         run: |
-          sudo dpkg --add-architecture i386
-          sudo apt update
-          sudo apt install -y wine64 wine32 wine64-tools libwine-dev libwine mingw-w64
+          sudo dnf install -y wine wine-devel
 
       - name: Build project
         run: |
