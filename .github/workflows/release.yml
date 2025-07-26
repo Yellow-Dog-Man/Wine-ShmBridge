@@ -3,6 +3,7 @@ name: Release on Tag
 on:
   push:
     tags:
+      - '**'
 
 jobs:
   wait-for-build:
