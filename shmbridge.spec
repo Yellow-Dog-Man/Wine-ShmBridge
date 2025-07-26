@@ -5,3 +5,5 @@
 @ stdcall sem_timedwait (ptr ptr) sem_timedwait_native
 @ stdcall sem_unlink (str) sem_unlink_native
 @ stdcall sem_close (ptr) sem_close_native
+@ stdcall get_product_info ()
+@ stdcall get_version_info ()
