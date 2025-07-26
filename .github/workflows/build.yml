@@ -16,7 +16,8 @@ jobs:
           wget -qO - https://dl.winehq.org/wine-builds/winehq.key | sudo apt-key add -
           sudo add-apt-repository ppa:cybermax-dexter/sdl2-backport
           sudo apt-add-repository "deb https://dl.winehq.org/wine-builds/ubuntu $(lsb_release -cs) main"
-          sudo apt install --install-recommends winehq-stable wine-development wine32-development wine64-development libwine-development libwine-development:i386 fonts-wine
+          sudo apt install --install-recommends winehq-stable wine-devel wine-devel-dev wine-devel-i386
+
       - name: Build project
         run: |
           bash Build.sh
