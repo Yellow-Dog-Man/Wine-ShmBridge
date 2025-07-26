@@ -14,7 +14,7 @@ jobs:
 
       - name: Install Wine and winecc
         run: |
-          sudo dnf install -y wine wine-devel gcc
+          sudo dnf install -y wine wine-devel @development-tools
 
       - name: Build project
         run: |
