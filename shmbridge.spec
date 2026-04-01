@@ -1,9 +1,9 @@
-@ stdcall sem_open (str long long long) sem_open_native
-@ stdcall sem_post (ptr) sem_post_native
-@ stdcall sem_wait (ptr) sem_wait_native
-@ stdcall sem_trywait (ptr) sem_trywait_native
-@ stdcall sem_timedwait (ptr ptr) sem_timedwait_native
-@ stdcall sem_unlink (str) sem_unlink_native
-@ stdcall sem_close (ptr) sem_close_native
+@ stdcall sem_open (str long long long)
+@ stdcall sem_post (ptr)
+@ stdcall sem_wait (ptr)
+@ stdcall sem_trywait (ptr)
+@ stdcall sem_timedwait (ptr ptr)
+@ stdcall sem_unlink (str)
+@ stdcall sem_close (ptr)
 @ stdcall get_product_info ()
 @ stdcall get_version_info ()
