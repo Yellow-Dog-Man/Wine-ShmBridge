@@ -1,0 +1,10 @@
+EXPORTS
+  sem_open=sem_open_native
+  sem_post=sem_post_native
+  sem_wait=sem_wait_native
+  sem_trywait=sem_trywait_native
+  sem_timedwait=sem_timedwait_native
+  sem_unlink=sem_unlink_native
+  sem_close=sem_close_native
+  get_product_info
+  get_version_info

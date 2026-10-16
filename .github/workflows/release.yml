@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       build_run_id: ${{ steps.get_build.outputs.build_run_id }}
+      build_run_id2: ${{ steps.get_build.outputs.build_run_id2 }}
     steps:
       - name: Wait for build workflow to finish
         id: get_build
@@ -19,6 +20,7 @@ jobs:
             const tag = process.env.GITHUB_REF_NAME;
             const commit = process.env.GITHUB_SHA;
             const workflowFile = 'build.yml';
+            const workflowFile2 = 'build-macos.yml';
             const pollInterval = 10;
             const timeout = 600;
 
@@ -27,39 +29,69 @@ jobs:
             }
 
             let foundRun = null;
+            let foundRun2 = null;
             let waited = 0;
             while (waited < timeout) {
-              const runs = await github.rest.actions.listWorkflowRuns({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: workflowFile,
-                per_page: 10,
-                status: 'completed'
-              });
-              foundRun = runs.data.workflow_runs.find(run =>
-                run.head_sha === commit && run.conclusion === 'success'
-              );
-              if (foundRun) break;
+              if (!foundRun) {
+                const runs = await github.rest.actions.listWorkflowRuns({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: workflowFile,
+                  per_page: 10,
+                  status: 'completed'
+                });
+                foundRun = runs.data.workflow_runs.find(run =>
+                  run.head_sha === commit && run.conclusion === 'success'
+                );
+              }
+              if (!foundRun2) {
+                const runs = await github.rest.actions.listWorkflowRuns({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: workflowFile2,
+                  per_page: 10,
+                  status: 'completed'
+                });
+                foundRun2 = runs.data.workflow_runs.find(run =>
+                  run.head_sha === commit && run.conclusion === 'success'
+                );
+              }
+              if (foundRun && foundRun2) break;
               await sleep(pollInterval * 1000);
               waited += pollInterval;
             }
             if (!foundRun) {
               core.setFailed(`Timed out waiting for successful build.yml for commit ${commit}`);
             }
+            if (!foundRun2) {
+              core.setFailed(`Timed out waiting for successful build-macos.yml for commit ${commit}`);
+            }
             core.setOutput('build_run_id', foundRun.id);
+            core.setOutput('build_run_id2', foundRun2.id);
 
   release:
     needs: wait-for-build
     runs-on: ubuntu-latest
+    permissions:
+      artifact-metadata: read
+      actions: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download artifact from build workflow
+      - name: Download artifact from Linux workflow
         uses: dawidd6/action-download-artifact@v3
         with:
           run_id: ${{ needs.wait-for-build.outputs.build_run_id }}
           name: wine-shmbridge
-          path: ./artifact
+          path: ./artifact-linux
+
+      - name: Download artifact from macOS workflow
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          run_id: ${{ needs.wait-for-build.outputs.build_run_id2 }}
+          name: wine-shmbridge
+          path: ./artifact-macos
 
       - name: Create Release
         id: create_release
@@ -69,6 +101,8 @@ jobs:
           name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
-          files: ./artifact/**
+          files: |
+            ./artifact-linux/**
+            ./artifact-macos/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

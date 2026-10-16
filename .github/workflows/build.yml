@@ -1,4 +1,4 @@
-name: Build project
+name: Build project (Linux)
 
 on:
   push:
@@ -7,22 +7,26 @@ jobs:
   build-project:
     runs-on: ubuntu-latest
     container:
-      image: fedora:latest
+      image: fedora:44
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Wine and winecc
         run: |
+          sudo dnf config-manager addrepo -y --from-repofile=https://dl.winehq.org/wine-builds/fedora/44/winehq.repo
           sudo dnf group install -y development-tools
-          sudo dnf install -y wine wine-devel gcc-c++
+          sudo dnf install -y wine-staging wine-staging-devel gcc-c++ mingw64-gcc mingw64-gcc-c++
+          echo "/opt/wine-staging/bin" >> "$GITHUB_PATH"
 
       - name: Build project
         run: |
-          bash Build.sh
+          make WINE_DIR=/opt/wine-staging BUILTIN=1 wine-linux native-linux
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wine-shmbridge
-          path: '*.so'
+          path: |
+            *.so
+            *.dll
